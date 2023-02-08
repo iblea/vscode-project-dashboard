@@ -1,18 +1,17 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export default abstract class BaseService {
-    context: vscode.ExtensionContext;
+  context: vscode.ExtensionContext;
 
-    constructor(context: vscode.ExtensionContext) {
-        this.context = context;
-    }
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context;
+  }
 
-    get configurationSection(): vscode.WorkspaceConfiguration {
-        return vscode.workspace.getConfiguration('dashboard');
-    }
+  get configurationSection(): vscode.WorkspaceConfiguration {
+    return vscode.workspace.getConfiguration("dashboard");
+  }
 
-    useSettingsStorage(): boolean {
-        return this.configurationSection.get('storeProjectsInSettings');
-    }
-
+  useSettingsStorage(): boolean {
+    return this.configurationSection.get("storeProjectsInSettings");
+  }
 }

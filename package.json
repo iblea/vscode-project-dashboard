@@ -1,200 +1,200 @@
 {
-    "name": "vscode-dashboard",
-    "displayName": "Project Dashboard",
-    "description": "Organize your workspaces in a speed-dial manner.",
-    "version": "2.6.0",
-    "publisher": "kruemelkatze",
-    "icon": "media/extension_icon.png",
-    "engines": {
-        "vscode": "^1.51.0"
-    },
-    "extensionKind": [
-        "ui",
-        "workspace"
-    ],
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "*"
-    ],
-    "main": "./dist/dashboard",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Kruemelkatze/vscode-dashboard.git"
-    },
-    "capabilities": {
-        "untrustedWorkspaces": {
-            "supported": true
-        }
-    },
-    "contributes": {
-        "commands": [
-            {
-                "command": "dashboard.open",
-                "title": "Project Dashboard: Open"
-            },
-            {
-                "command": "dashboard.addGroup",
-                "title": "Project Dashboard: Add Group"
-            },
-            {
-                "command": "dashboard.removeGroup",
-                "title": "Project Dashboard: Remove Group"
-            },
-            {
-                "command": "dashboard.addProject",
-                "title": "Project Dashboard: Add Project"
-            },
-            {
-                "command": "dashboard.removeProject",
-                "title": "Project Dashboard: Remove Project"
-            },
-            {
-                "command": "dashboard.editProjects",
-                "title": "Project Dashboard: Edit Projects"
-            },
-            {
-                "command": "dashboard.addProjectsFromFolder",
-                "title": "Project Dashboard: Add Projects from Folder"
-            }
-        ],
-        "keybindings": [
-            {
-                "command": "dashboard.open",
-                "key": "ctrl+f1",
-                "mac": "cmd+f1"
-            }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "Project Dashboard",
-            "properties": {
-                "dashboard.projectData": {
-                    "type": [
-                        "array",
-                        "null"
-                    ],
-                    "markdownDescription": "Stores the dashboard data if the ```dashboard.storeProjectsInSettings``` option is set to ```true```. The raw data can be edited by using the command ```Dashboard: Edit Projects```.",
-                    "default": null
-                },
-                "dashboard.searchIsActiveByDefault": {
-                    "type": "boolean",
-                    "default": true
-                },
-                "dashboard.customCss": {
-                    "type": "string",
-                    "markdownDescription": "Custom CSS rules to be injected into the dashboard can be placed here. Note that this will not be sanitized!",
-                    "default": null
-                },
-                "dashboard.recentColors": {
-                    "type": "array",
-                    "markdownDescription": "Stores the recently used colors if the ```dashboard.storeProjectsInSettings``` option is set to ```true```.",
-                    "default": null
-                },
-                "dashboard.storeProjectsInSettings": {
-                    "type": "boolean",
-                    "default": false,
-                    "markdownDescription": "If set to ```true```, the dashboard data is saved in the user settings and can be synced using the ```Settings Sync``` extension to multiple devices. NOTE: This disables the possibility of having varying dashboard data on these devices. **(VSCode restart required)**"
-                },
-                "dashboard.displayProjectPath": {
-                    "type": "boolean",
-                    "default": true
-                },
-                "dashboard.prependVscodeUrlToWslRemotes": {
-                    "type": "boolean",
-                    "default": true
-                },
-                "dashboard.projectTileWidth": {
-                    "description": "In px, default: 350",
-                    "type": "number",
-                    "default": 350
-                },
-                "dashboard.recentColorsToRemember": {
-                    "type": "number",
-                    "default": 15
-                },
-                "dashboard.openOnStartup": {
-                    "type": "string",
-                    "default": "empty workspace",
-                    "markdownDescription": "Note: The ```empty workspace``` option takes only effect if [Workbench: Startup Editor](#workbench.startupEditor) is to ```none``` or a ```welcomePage``` option.",
-                    "enum": [
-                        "always",
-                        "empty workspace",
-                        "never"
-                    ]
-                },
-                "dashboard.showAddGroupButtonTile": {
-                    "type": "boolean",
-                    "markdownDescription": "If set to ```false```, the '+ New Group' tile is hidden. Groups can be added by using the Command Palette (default ```F1```) with 'dashboard: Add Group' action. The dashboard needs to be refreshed for the changes to take effect.",
-                    "default": true
-                },
-                "dashboard.showAddProjectButtonTile": {
-                    "type": "boolean",
-                    "markdownDescription": "If set to ```false```, the dedicated '+' tile is hidden inside groups. Projects can be added by using the actions when hovering the group name. The dashboard needs to be refreshed for the changes to take effect.",
-                    "default": true
-                },
-                "dashboard.customProjectCardBackground": {
-                    "type": "string",
-                    "default": null
-                },
-                "dashboard.customProjectNameColor": {
-                    "type": "string",
-                    "default": null
-                },
-                "dashboard.customProjectPathColor": {
-                    "type": "string",
-                    "default": null
-                }
-            }
-        },
-        "views": {
-            "project-dashboard": [
-                {
-                    "type": "webview",
-                    "id": "projectDashboard.dashboard",
-                    "name": "Project Dashboard",
-                    "icon": "media/icon.svg",
-                    "visibility": "visible",
-                    "contextualTitle": "Project Dashboard"
-                }
-            ]
-        },
-        "viewsContainers": {
-            "activitybar": [
-                {
-                    "id": "project-dashboard",
-                    "title": "Project Dashboard",
-                    "icon": "media/icon.svg"
-                }
-            ]
-        }
-    },
-    "scripts": {
-        "vscode:prepublish": "webpack --mode production && npx gulp --production",
-        "webpack": "webpack --mode development",
-        "webpack-dev": "webpack --mode development --watch",
-        "test-compile": "tsc -p ./",
-        "lint": "tslint -p ./"
-    },
-    "devDependencies": {
-        "@types/mocha": "^8.0.4",
-        "@types/node": "^14.14.8",
-        "@types/vscode": "^1.51.0",
-        "gulp": "^4.0.2",
-        "gulp-clean-css": "^4.3.0",
-        "gulp-mode": "^1.1.0",
-        "gulp-sass": "^5.0.0",
-        "sass": "^1.56.0",
-        "ts-loader": "^6.2.2",
-        "tslint": "^6.1.3",
-        "typescript": "^4.0.5",
-        "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0"
-    },
-    "dependencies": {
-        "dom-autoscroller": "^2.3.4",
-        "dragula": "^3.7.3",
-        "fitty": "^2.3.5"
+  "name": "vscode-dashboard-window-colors",
+  "displayName": "Project Dashboard",
+  "description": "Organize your workspaces in a speed-dial manner.",
+  "version": "2.6.1",
+  "publisher": "Daniel Varentsoff",
+  "icon": "media/extension_icon.png",
+  "engines": {
+    "vscode": "^1.51.0"
+  },
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./dist/dashboard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kruemelkatze/vscode-dashboard.git"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
     }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "dashboard.open",
+        "title": "Project Dashboard: Open"
+      },
+      {
+        "command": "dashboard.addGroup",
+        "title": "Project Dashboard: Add Group"
+      },
+      {
+        "command": "dashboard.removeGroup",
+        "title": "Project Dashboard: Remove Group"
+      },
+      {
+        "command": "dashboard.addProject",
+        "title": "Project Dashboard: Add Project"
+      },
+      {
+        "command": "dashboard.removeProject",
+        "title": "Project Dashboard: Remove Project"
+      },
+      {
+        "command": "dashboard.editProjects",
+        "title": "Project Dashboard: Edit Projects"
+      },
+      {
+        "command": "dashboard.addProjectsFromFolder",
+        "title": "Project Dashboard: Add Projects from Folder"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "dashboard.open",
+        "key": "ctrl+f1",
+        "mac": "cmd+f1"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Project Dashboard",
+      "properties": {
+        "dashboard.projectData": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "markdownDescription": "Stores the dashboard data if the ```dashboard.storeProjectsInSettings``` option is set to ```true```. The raw data can be edited by using the command ```Dashboard: Edit Projects```.",
+          "default": null
+        },
+        "dashboard.searchIsActiveByDefault": {
+          "type": "boolean",
+          "default": true
+        },
+        "dashboard.customCss": {
+          "type": "string",
+          "markdownDescription": "Custom CSS rules to be injected into the dashboard can be placed here. Note that this will not be sanitized!",
+          "default": null
+        },
+        "dashboard.recentColors": {
+          "type": "array",
+          "markdownDescription": "Stores the recently used colors if the ```dashboard.storeProjectsInSettings``` option is set to ```true```.",
+          "default": null
+        },
+        "dashboard.storeProjectsInSettings": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "If set to ```true```, the dashboard data is saved in the user settings and can be synced using the ```Settings Sync``` extension to multiple devices. NOTE: This disables the possibility of having varying dashboard data on these devices. **(VSCode restart required)**"
+        },
+        "dashboard.displayProjectPath": {
+          "type": "boolean",
+          "default": true
+        },
+        "dashboard.prependVscodeUrlToWslRemotes": {
+          "type": "boolean",
+          "default": true
+        },
+        "dashboard.projectTileWidth": {
+          "description": "In px, default: 350",
+          "type": "number",
+          "default": 350
+        },
+        "dashboard.recentColorsToRemember": {
+          "type": "number",
+          "default": 15
+        },
+        "dashboard.openOnStartup": {
+          "type": "string",
+          "default": "empty workspace",
+          "markdownDescription": "Note: The ```empty workspace``` option takes only effect if [Workbench: Startup Editor](#workbench.startupEditor) is to ```none``` or a ```welcomePage``` option.",
+          "enum": [
+            "always",
+            "empty workspace",
+            "never"
+          ]
+        },
+        "dashboard.showAddGroupButtonTile": {
+          "type": "boolean",
+          "markdownDescription": "If set to ```false```, the '+ New Group' tile is hidden. Groups can be added by using the Command Palette (default ```F1```) with 'dashboard: Add Group' action. The dashboard needs to be refreshed for the changes to take effect.",
+          "default": true
+        },
+        "dashboard.showAddProjectButtonTile": {
+          "type": "boolean",
+          "markdownDescription": "If set to ```false```, the dedicated '+' tile is hidden inside groups. Projects can be added by using the actions when hovering the group name. The dashboard needs to be refreshed for the changes to take effect.",
+          "default": true
+        },
+        "dashboard.customProjectCardBackground": {
+          "type": "string",
+          "default": null
+        },
+        "dashboard.customProjectNameColor": {
+          "type": "string",
+          "default": null
+        },
+        "dashboard.customProjectPathColor": {
+          "type": "string",
+          "default": null
+        }
+      }
+    },
+    "views": {
+      "project-dashboard": [
+        {
+          "type": "webview",
+          "id": "projectDashboard.dashboard",
+          "name": "Project Dashboard",
+          "icon": "media/icon.svg",
+          "visibility": "visible",
+          "contextualTitle": "Project Dashboard"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "project-dashboard",
+          "title": "Project Dashboard",
+          "icon": "media/icon.svg"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "webpack --mode production && npx gulp --production",
+    "webpack": "webpack --mode development",
+    "webpack-dev": "webpack --mode development --watch",
+    "test-compile": "tsc -p ./",
+    "lint": "tslint -p ./"
+  },
+  "devDependencies": {
+    "@types/mocha": "^8.0.4",
+    "@types/node": "^14.14.8",
+    "@types/vscode": "^1.51.0",
+    "gulp": "^4.0.2",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-mode": "^1.1.0",
+    "gulp-sass": "^5.0.0",
+    "sass": "^1.56.0",
+    "ts-loader": "^6.2.2",
+    "tslint": "^6.1.3",
+    "typescript": "^4.0.5",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "dom-autoscroller": "^2.3.4",
+    "dragula": "^3.7.3",
+    "fitty": "^2.3.5"
+  }
 }
