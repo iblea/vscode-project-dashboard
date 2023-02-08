@@ -18,7 +18,7 @@ $useAddProjectOpacity: true;
 $projectListMinHeight: calc(var(--column-width) * #{math.div(163, $defaultColumnWidth)});
 $projectCardMinHeight: calc(var(--column-width) * #{math.div(96, $defaultColumnWidth)});
 
-$borderTopSize: 7px;
+$borderTopSize: 8px;
 $defaultPadding: 20px;
 $projectHeaderSize: 40px; // This has also be adjusted in constants.ts for fitty
 $projectHeaderMinHeight: 53px; // To be constant even with fitted font size
@@ -36,7 +36,7 @@ $actionTransitionDelay: 250ms;
         margin-right: $spacing;
     }
 
-    :hover > svg {
+    :hover>svg {
         filter: brightness(150%);
     }
 
@@ -52,6 +52,7 @@ body {
     // See https://stackoverflow.com/questions/14389566/stop-css-transition-from-firing-on-page-load
     // Suggested fixes with css preload or <script> </script> do not work, as vscode injects javascript directly under <head>
     &.preload {
+
         &,
         * {
             transition: none !important;
@@ -110,7 +111,7 @@ body {
         font-weight: 200;
         margin-left: 0px;
 
-        > span {
+        >span {
             cursor: pointer;
         }
 
@@ -191,8 +192,9 @@ body {
 }
 
 @if ($useAddProjectOpacity) {
+
     .group:hover .add-project,
-    .group-title:hover + .group .add-project {
+    .group-title:hover+.group .add-project {
         opacity: 0.6;
     }
 }
@@ -200,6 +202,9 @@ body {
 .project-container {
     display: inline-block;
     width: var(--column-width);
+    overflow: hidden;
+    margin: 0 20px 20px 0;
+    border-radius: 8px;
 
     &.slim {
         width: calc(var(--column-width) / 5);
@@ -216,9 +221,7 @@ body .project {
     justify-content: center;
     align-items: center;
 
-    margin: 0 $defaultPadding $defaultPadding 0;
-    padding: $defaultPadding;
-    padding-top: $defaultPadding + $borderTopSize;
+    padding: 27px 25px 20px 25px;
 
     background: var(--dashboard-project-card-bg);
 
@@ -511,6 +514,7 @@ body {
 
     &.filtering-active {
         padding-top: $filter-offset;
+
         .filter-wrapper {
             top: 0;
         }
