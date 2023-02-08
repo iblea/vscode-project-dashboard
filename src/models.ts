@@ -1,11 +1,8 @@
-"use strict";
+'use strict';
 
-import * as vscode from "vscode";
-import {
-  SSH_REMOTE_PREFIX,
-  StorageOption,
-  WSL_DEFAULT_REGEX,
-} from "./constants";
+import { readFileSync } from 'fs';
+import * as vscode from 'vscode';
+import { SSH_REMOTE_PREFIX, StorageOption, WSL_DEFAULT_REGEX } from './constants';
 
 export class Group {
   id: string;
@@ -37,13 +34,29 @@ export class Project {
     this.path = path;
   }
 
+  static getWorkspaceColor(project: Project) {
+    try {
+      const fileContent = readFileSync(`${project.path}/.vscode/settings.json`, 'utf8')
+        .replace(/(\/\/.*)/gi, '') // It is important to ignore comments of json file
+        .trim();
+      const settings = JSON.parse(fileContent);
+      const colorCustomizations = settings['workbench.colorCustomizations'];
+      return (
+        colorCustomizations['titleBar.activeBackground'] ||
+        colorCustomizations['activityBar.background']
+      );
+    } catch (ex) {
+      console.error(`Unable to load workspace color: ${ex.name}`);
+      return null;
+    }
+  }
+
   getRemoteType(): ProjectRemoteType {
     if (this.path && this.path.startsWith(SSH_REMOTE_PREFIX)) {
       return ProjectRemoteType.SSH;
     } else if (
       this.path &&
-      (this.path.match(WSL_DEFAULT_REGEX) ||
-        this.path.startsWith("vscode-remote://wsl+"))
+      (this.path.match(WSL_DEFAULT_REGEX) || this.path.startsWith('vscode-remote://wsl+'))
     ) {
       return ProjectRemoteType.WSL;
     }
@@ -58,10 +71,10 @@ export class Project {
 
 export function sanitizeProjectName(name: string) {
   if (!name) {
-    return "";
+    return '';
   }
 
-  return name.replace(/<[^>]+>/g, "").trim();
+  return name.replace(/<[^>]+>/g, '').trim();
 }
 
 export function getRemoteType(project: Project): ProjectRemoteType {
@@ -70,14 +83,12 @@ export function getRemoteType(project: Project): ProjectRemoteType {
 
 function generateRandomId(prepend: string = null) {
   if (prepend) {
-    prepend = prepend.replace(/\W/gi, "").toLowerCase().substring(0, 24);
+    prepend = prepend.replace(/\W/gi, '').toLowerCase().substring(0, 24);
   } else {
-    prepend = "";
+    prepend = '';
   }
 
-  return (
-    prepend + Math.random().toString(36).substr(2, 9) + Date.now().toString(36)
-  );
+  return prepend + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 }
 
 export interface GroupOrder {

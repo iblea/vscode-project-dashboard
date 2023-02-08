@@ -979,6 +979,11 @@ export function activate(context: vscode.ExtensionContext) {
       return "";
     }
 
+    // If color is received from workspace:
+    if(colorCode = 'WORKSPACE') {
+        return 'Workspace color from .vscode/settings.json'
+    }
+
     // If color is predefined, use this label only.
     let predefColor = PREDEFINED_COLORS.find((c) => c.value === colorCode);
     if (predefColor) {
@@ -1015,6 +1020,10 @@ export function activate(context: vscode.ExtensionContext) {
       label: c.label,
     }));
     colorPicks.unshift({ id: FixedColorOptions.random, label: "Random Color" });
+    colorPicks.unshift({
+      id: FixedColorOptions.workspace,
+      label: "> Workspace Color",
+    });
     colorPicks.unshift({
       id: FixedColorOptions.custom,
       label: "> Custom Color",
@@ -1103,6 +1112,8 @@ export function activate(context: vscode.ExtensionContext) {
             color = selectedRecentColor.id;
           }
           break;
+        case FixedColorOptions.workspace:
+          return "WORKSPACE";
         case FixedColorOptions.none:
           return null; // Only case to allow null color
         case FixedColorOptions.random:

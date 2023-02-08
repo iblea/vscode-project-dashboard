@@ -335,6 +335,15 @@ export default class ProjectService extends BaseService {
     for (let g of groups) {
       if (!g.id) {
         g.id = Group.getRandomId();
+        // FIXME: Investigate why instantiated but getters are N/A
+        // g.projects = g.projects.map((project) => {
+        //   const { id, name, color, path, isGitRepo } = project;
+        //   const projectEntity = new Project(name, path);
+        //   projectEntity.id = id;
+        //   projectEntity.color = color;
+        //   projectEntity.isGitRepo = isGitRepo;
+        //   return projectEntity;
+        // });
       }
     }
 

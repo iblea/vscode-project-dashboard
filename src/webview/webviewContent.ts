@@ -202,7 +202,12 @@ function getTempGroupSection(totalGroupCount: number) {
 }
 
 function getProjectDiv(project: Project, infos: DashboardInfos) {
-  var borderStyle = `background: ${project.color};`; // TODO: Sets here
+  console.log(project);
+  var borderStyle = `background: ${
+    project.color === "WORKSPACE"
+      ? Project.getWorkspaceColor(project)
+      : project.color
+  };`; // TODO: Color is set here
   var remoteType = getRemoteType(project);
   var trimmedPath = (project.path || "").replace(REMOTE_REGEX, "");
   var lowerName = (project.name || "").toLowerCase();
