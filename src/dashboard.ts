@@ -447,7 +447,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     let accepted = await vscode.window.showWarningMessage(
-      `Remove ${group.groupName}?`,
+      `Remove ${group.groupName} from dashboard?`,
       { modal: true },
       "Remove"
     );

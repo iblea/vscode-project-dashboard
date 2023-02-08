@@ -6,7 +6,7 @@
 
 ## Workspace colors
 
-This version support getting colors from vscode settings of project. All you need to enable this feature is select the `> Workspace Color` in project tab.
+This version support getting colors from vscode settings of project. All you need to enable this feature is select the `> Workspace Color` in color selector when adding a tab to project dashboard.
 
 > Here is a good extension which is automagically setting up workspace colors: [Window Colors](https://marketplace.visualstudio.com/items?itemName=stuart.unique-window-colors))
 
