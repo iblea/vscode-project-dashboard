@@ -70,6 +70,30 @@
       "type": "object",
       "title": "Project Dashboard",
       "properties": {
+        "dashboard.windowColors.🌈 Theme": {
+          "type": "string",
+          "default": "dark",
+          "enum": [
+            "dark",
+            "light",
+            "remove"
+          ],
+          "enumDescriptions": [
+            "Applies a dark-themed color to the activityBar and titleBar.  First 'remove' and reload VSCode for changes to take effect. ",
+            "Applies a light-themed color to the activityBar and titleBar.  First 'remove' and reload VSCode for changes to take effect. ",
+            "Removes the modified color settings from .vscode/settings.json"
+          ],
+          "description": "Controls the color shades to blend with dark or light themes.  To switch betwen light and dark, you must first select 'remove' and reload VSCode to remove the settings, because they are not automatically overwritten.  This lets you modify the selected colors if you don't like what the extension picks.  \n\nReload the window for this to take effect (cmd-⇧-P, 'Reload Window')"
+        },
+        "dashboard.windowColors.🌈 DeleteSettingsFileUponExit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Delete .vscode/settings.json each time you close the workspace/window.  This prevents this file from being saved even when you haven't manually edited it.  This setting is necessary in situations where VSCode needelessly copies global settings to this workspace settings file. \n\n🚨 This will delete any workspace customizations you might have saved, including a Base Color.\n\nThis should be set in 'User Settings' instead of 'Workspace Settings' or else it will just delete itself."
+        },
+        "dashboard.windowColors.🌈 BaseColor": {
+          "type": "string",
+          "description": "Html color name or hex color value (eg 'whitesmoke' or '#ffffff').\n\nhttps://www.w3schools.com/colors/colors_names.asp\n\nReload the window for this to take effect (cmd-shift-p, 'Reload Window')\n\nTo remove a Base Color, you'll have to delete the relevant settings in .vscode/settings.json either manually or by selecting 'Delete Settings File Upon Exit'."
+        },
         "dashboard.projectData": {
           "type": [
             "array",
@@ -195,6 +219,7 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
+    "color": "^4.2.3",
     "dom-autoscroller": "^2.3.4",
     "dragula": "^3.7.3",
     "fitty": "^2.3.5"

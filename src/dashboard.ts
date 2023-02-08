@@ -1,6 +1,6 @@
-"use strict";
-import * as vscode from "vscode";
-import * as path from "path";
+'use strict';
+import * as vscode from 'vscode';
+import * as path from 'path';
 import {
   Project,
   GroupOrder,
@@ -12,11 +12,8 @@ import {
   ReopenDashboardReason,
   ProjectPathType,
   sanitizeProjectName,
-} from "./models";
-import {
-  getSidebarContent,
-  getDashboardContent,
-} from "./webview/webviewContent";
+} from './models';
+import { getSidebarContent, getDashboardContent } from './webview/webviewContent';
 import {
   USE_PROJECT_COLOR,
   PREDEFINED_COLORS,
@@ -29,19 +26,18 @@ import {
   SSH_REMOTE_PREFIX,
   REOPEN_KEY,
   WSL_DEFAULT_REGEX,
-} from "./constants";
-import { execSync } from "child_process";
-import { lstatSync } from "fs";
+} from './constants';
+import { execSync } from 'child_process';
+import { lstatSync } from 'fs';
 
-import ColorService from "./services/colorService";
-import ProjectService from "./services/projectService";
-import FileService from "./services/fileService";
+import ColorService from './services/colorService';
+import ProjectService from './services/projectService';
+import FileService from './services/fileService';
+import { activate as initWindowColors } from './windowColors';
 
 export function activate(context: vscode.ExtensionContext) {
-  class SidebarDummyDashboardViewProvider
-    implements vscode.WebviewViewProvider
-  {
-    public static readonly viewType = "projectDashboard.dashboard";
+  class SidebarDummyDashboardViewProvider implements vscode.WebviewViewProvider {
+    public static readonly viewType = 'projectDashboard.dashboard';
 
     private _view?: vscode.WebviewView;
 
@@ -50,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
     resolveWebviewView(
       webviewView: vscode.WebviewView,
       webviewContext: vscode.WebviewViewResolveContext<unknown>,
-      token: vscode.CancellationToken
+      token: vscode.CancellationToken,
     ): void | Thenable<void> {
       this._view = webviewView;
 
@@ -62,11 +58,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     switchToMainDashboard = () => {
       if (this._view?.visible) {
-        vscode.commands.executeCommand("workbench.view.explorer");
+        vscode.commands.executeCommand('workbench.view.explorer');
         showDashboard();
       }
     };
   }
+
+  // FIXME: Refactor
+  initWindowColors(context);
 
   var instance: vscode.WebviewPanel = null;
   const colorService = new ColorService(context);
@@ -76,10 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
   const provider = new SidebarDummyDashboardViewProvider(context.extensionUri);
 
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      SidebarDummyDashboardViewProvider.viewType,
-      provider
-    )
+    vscode.window.registerWebviewViewProvider(SidebarDummyDashboardViewProvider.viewType, provider),
   );
 
   const dashboardInfos: DashboardInfos = {
@@ -87,56 +83,47 @@ export function activate(context: vscode.ExtensionContext) {
       remoteSSH: false,
     },
     get config() {
-      return vscode.workspace.getConfiguration("dashboard");
+      return vscode.workspace.getConfiguration('dashboard');
     },
     get otherStorageHasData() {
       return projectService.otherStorageHasData();
     },
   };
 
-  const openCommand = vscode.commands.registerCommand("dashboard.open", () => {
+  const openCommand = vscode.commands.registerCommand('dashboard.open', () => {
     showDashboard();
   });
 
-  const addProjectCommand = vscode.commands.registerCommand(
-    "dashboard.addProject",
-    async () => {
-      await addProject();
-    }
-  );
+  const addProjectCommand = vscode.commands.registerCommand('dashboard.addProject', async () => {
+    await addProject();
+  });
 
   const removeProjectCommand = vscode.commands.registerCommand(
-    "dashboard.removeProject",
+    'dashboard.removeProject',
     async () => {
       await removeProjectPerCommand();
-    }
+    },
   );
 
   const editProjectsManuallyCommand = vscode.commands.registerCommand(
-    "dashboard.editProjects",
+    'dashboard.editProjects',
     async () => {
       await editProjectsManuallyPerCommand();
-    }
+    },
   );
 
-  const addGroupCommand = vscode.commands.registerCommand(
-    "dashboard.addGroup",
-    async () => {
-      await addGroup();
-    }
-  );
+  const addGroupCommand = vscode.commands.registerCommand('dashboard.addGroup', async () => {
+    await addGroup();
+  });
 
-  const removeGroupCommand = vscode.commands.registerCommand(
-    "dashboard.removeGroup",
-    async () => {
-      await removeGroupPerCommand();
-    }
-  );
+  const removeGroupCommand = vscode.commands.registerCommand('dashboard.removeGroup', async () => {
+    await removeGroupPerCommand();
+  });
   const addProjectsFromFolderCommand = vscode.commands.registerCommand(
-    "dashboard.addProjectsFromFolder",
+    'dashboard.addProjectsFromFolder',
     async () => {
       await addProjectsFromFolder();
-    }
+    },
   );
 
   context.subscriptions.push(openCommand);
@@ -148,7 +135,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(addProjectsFromFolderCommand);
 
   vscode.workspace.onDidChangeConfiguration((event) => {
-    if (event.affectsConfiguration("dashboard.storeProjectsInSettings")) {
+    if (event.affectsConfiguration('dashboard.storeProjectsInSettings')) {
       checkDataMigration(true);
     }
   });
@@ -156,14 +143,10 @@ export function activate(context: vscode.ExtensionContext) {
   startUp();
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~ Functions ~~~~~~~~~~~~~~~~~~~~~~~~~
-  async function checkDataMigration(
-    openDashboardAfterMigrate: boolean = false
-  ) {
+  async function checkDataMigration(openDashboardAfterMigrate: boolean = false) {
     let migrated = await projectService.migrateDataIfNeeded();
     if (migrated) {
-      vscode.window.showInformationMessage(
-        "Migrated Dashboard Projects after changing Settings."
-      );
+      vscode.window.showInformationMessage('Migrated Dashboard Projects after changing Settings.');
 
       if (openDashboardAfterMigrate) {
         showDashboard();
@@ -180,15 +163,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     await checkDataMigration();
 
-    let reopenDashboardReason = context.globalState.get(
-      REOPEN_KEY
-    ) as ReopenDashboardReason;
+    let reopenDashboardReason = context.globalState.get(REOPEN_KEY) as ReopenDashboardReason;
     context.globalState.update(REOPEN_KEY, ReopenDashboardReason.None);
     showDashboardOnOpenIfNeeded(reopenDashboardReason);
   }
 
   function showDashboardOnOpenIfNeeded(
-    reopenReason: ReopenDashboardReason = ReopenDashboardReason.None
+    reopenReason: ReopenDashboardReason = ReopenDashboardReason.None,
   ) {
     var open = reopenReason !== ReopenDashboardReason.None;
 
@@ -208,8 +189,7 @@ export function activate(context: vscode.ExtensionContext) {
           let noOpenEditorsOrWorkspaces =
             !vscode.workspace.name &&
             (editors.length === 0 ||
-              (editors.length === 1 &&
-                editors[0].document.languageId === "code-runner-output"));
+              (editors.length === 1 && editors[0].document.languageId === 'code-runner-output'));
           open = noOpenEditorsOrWorkspaces;
           break;
       }
@@ -231,31 +211,22 @@ export function activate(context: vscode.ExtensionContext) {
         context,
         instance.webview,
         projects,
-        dashboardInfos
+        dashboardInfos,
       );
       instance.reveal(columnToShowIn);
     } else {
       var panel = vscode.window.createWebviewPanel(
-        "dashboard",
-        "Project Dashboard",
+        'dashboard',
+        'Project Dashboard',
         vscode.ViewColumn.One,
         {
           enableScripts: true,
-          localResourceRoots: [
-            vscode.Uri.file(path.join(context.extensionPath, "media")),
-          ],
-        }
+          localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'media'))],
+        },
       );
-      panel.iconPath = vscode.Uri.file(
-        path.join(context.extensionPath, "media", "icon.svg")
-      );
+      panel.iconPath = vscode.Uri.file(path.join(context.extensionPath, 'media', 'icon.svg'));
 
-      panel.webview.html = getDashboardContent(
-        context,
-        panel.webview,
-        projects,
-        dashboardInfos
-      );
+      panel.webview.html = getDashboardContent(context, panel.webview, projects, dashboardInfos);
 
       // Reset when the current panel is closed
       panel.onDidDispose(
@@ -263,60 +234,60 @@ export function activate(context: vscode.ExtensionContext) {
           instance = null;
         },
         null,
-        context.subscriptions
+        context.subscriptions,
       );
 
       panel.webview.onDidReceiveMessage(async (e) => {
         let projectId: string, groupId: string;
         switch (e.type) {
-          case "selected-project":
+          case 'selected-project':
             projectId = e.projectId as string;
             let projectOpenType = e.projectOpenType as ProjectOpenType;
 
             let project = projectService.getProject(projectId);
             if (project == null) {
-              vscode.window.showWarningMessage("Selected Project not found.");
+              vscode.window.showWarningMessage('Selected Project not found.');
               break;
             }
 
             await openProject(project, projectOpenType);
             break;
-          case "add-project":
+          case 'add-project':
             groupId = e.groupId as string;
             await addProject(groupId);
             break;
-          case "import-from-other-storage":
+          case 'import-from-other-storage':
             await projectService.copyProjectsFromFilledStorageOptionToEmptyStorageOption();
             await showDashboard();
             break;
-          case "reordered-projects":
+          case 'reordered-projects':
             let groupOrders = e.groupOrders as GroupOrder[];
             await reorderGroups(groupOrders);
             break;
-          case "remove-project":
+          case 'remove-project':
             projectId = e.projectId as string;
             await removeProject(projectId);
             break;
-          case "edit-project":
+          case 'edit-project':
             projectId = e.projectId as string;
             await editProject(projectId);
             break;
-          case "color-project":
+          case 'color-project':
             projectId = e.projectId as string;
             await editProjectColor(projectId);
             break;
-          case "edit-group":
+          case 'edit-group':
             groupId = e.groupId as string;
             await editGroup(groupId);
             break;
-          case "remove-group":
+          case 'remove-group':
             groupId = e.groupId as string;
             await removeGroup(groupId);
             break;
-          case "add-group":
+          case 'add-group':
             await addGroup();
             break;
-          case "collapse-group":
+          case 'collapse-group':
             groupId = e.groupId as string;
             await collapseGroup(groupId);
             break;
@@ -337,9 +308,7 @@ export function activate(context: vscode.ExtensionContext) {
       groupName = await queryGroupFields();
     } catch (error) {
       if (error.message !== USER_CANCELED) {
-        vscode.window.showErrorMessage(
-          `An error occured while adding the group.`
-        );
+        vscode.window.showErrorMessage(`An error occured while adding the group.`);
         throw error; // Rethrow error to make vscode log it
       }
 
@@ -362,9 +331,7 @@ export function activate(context: vscode.ExtensionContext) {
       groupName = await queryGroupFields(group.groupName);
     } catch (error) {
       if (error.message !== USER_CANCELED) {
-        vscode.window.showErrorMessage(
-          `An error occured while editing the group.`
-        );
+        vscode.window.showErrorMessage(`An error occured while editing the group.`);
         throw error; // Rethrow error to make vscode log it
       }
 
@@ -382,10 +349,9 @@ export function activate(context: vscode.ExtensionContext) {
     var groupName = await vscode.window.showInputBox({
       value: defaultText || undefined,
       valueSelection: defaultText ? [0, defaultText.length] : undefined,
-      placeHolder: "Group Name",
+      placeHolder: 'Group Name',
       ignoreFocusOut: true,
-      validateInput: (val: string) =>
-        val ? "" : "A Group Name must be provided.",
+      validateInput: (val: string) => (val ? '' : 'A Group Name must be provided.'),
     });
 
     if (groupName == null) {
@@ -404,13 +370,11 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       let currentlyOpenPath = getWorkspacePath();
       let folderPath = await vscode.window.showOpenDialog({
-        defaultUri: currentlyOpenPath
-          ? vscode.Uri.file(currentlyOpenPath)
-          : undefined,
+        defaultUri: currentlyOpenPath ? vscode.Uri.file(currentlyOpenPath) : undefined,
         canSelectFiles: false,
         canSelectFolders: true,
         canSelectMany: false,
-        openLabel: "Select Folder containing Projects",
+        openLabel: 'Select Folder containing Projects',
       });
 
       if (!folderPath || folderPath.length === 0) return;
@@ -428,9 +392,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
     } catch (error) {
       if (error.message !== USER_CANCELED) {
-        vscode.window.showErrorMessage(
-          `An error occured while adding the projects.`
-        );
+        vscode.window.showErrorMessage(`An error occured while adding the projects.`);
         throw error; // Rethrow error to make vscode log it
       }
 
@@ -449,7 +411,7 @@ export function activate(context: vscode.ExtensionContext) {
     let accepted = await vscode.window.showWarningMessage(
       `Remove ${group.groupName} from dashboard?`,
       { modal: true },
-      "Remove"
+      'Remove',
     );
     if (!accepted) {
       return;
@@ -471,23 +433,19 @@ export function activate(context: vscode.ExtensionContext) {
     //showDashboard(); // No need to repaint for that
   }
 
-  async function openProject(
-    project: Project,
-    projectOpenType: ProjectOpenType
-  ): Promise<void> {
+  async function openProject(project: Project, projectOpenType: ProjectOpenType): Promise<void> {
     // project is parsed from JSON at runtime, so its not an instance of Project
     let remoteType = getRemoteType(project);
-    let projectPath = (project.path || "").trim();
+    let projectPath = (project.path || '').trim();
 
-    if (!path.isAbsolute(projectPath) && !projectPath.includes("://")) {
+    if (!path.isAbsolute(projectPath) && !projectPath.includes('://')) {
       let rootPath =
-        vscode.workspace.workspaceFile?.path ||
-        vscode.workspace.workspaceFolders[0]?.uri.path;
+        vscode.workspace.workspaceFile?.path || vscode.workspace.workspaceFolders[0]?.uri.path;
       if (rootPath) {
         projectPath = path.join(rootPath, projectPath);
       } else {
         vscode.window.showWarningMessage(
-          "Tried to open a project with a relative path, but no workspace is open."
+          'Tried to open a project with a relative path, but no workspace is open.',
         );
         return;
       }
@@ -503,62 +461,38 @@ export function activate(context: vscode.ExtensionContext) {
         if (projectOpenType === ProjectOpenType.AddToWorkspace) {
           await addToWorkspace(project, uri);
         } else {
-          await vscode.commands.executeCommand(
-            "vscode.openFolder",
-            uri,
-            openInNewWindow
-          );
+          await vscode.commands.executeCommand('vscode.openFolder', uri, openInNewWindow);
         }
 
         break;
       case ProjectRemoteType.SSH:
-        let remotePathMatch = projectPath
-          .replace(SSH_REMOTE_PREFIX, "")
-          .match(SSH_REGEX);
-        let hasRemoteFolder =
-          remotePathMatch && remotePathMatch.groups.folder != null;
+        let remotePathMatch = projectPath.replace(SSH_REMOTE_PREFIX, '').match(SSH_REGEX);
+        let hasRemoteFolder = remotePathMatch && remotePathMatch.groups.folder != null;
 
         if (hasRemoteFolder) {
           uri = vscode.Uri.parse(projectPath);
-          vscode.commands.executeCommand(
-            "vscode.openFolder",
-            uri,
-            openInNewWindow
-          );
+          vscode.commands.executeCommand('vscode.openFolder', uri, openInNewWindow);
         } else {
-          vscode.commands.executeCommand("vscode.newWindow", {
-            remoteAuthority: projectPath.replace("vscode-remote://", ""),
+          vscode.commands.executeCommand('vscode.newWindow', {
+            remoteAuthority: projectPath.replace('vscode-remote://', ''),
             reuseWindow: !openInNewWindow,
           });
         }
         break;
       case ProjectRemoteType.WSL:
         var { prependVscodeUrlToWslRemotes } = dashboardInfos.config;
-        if (
-          prependVscodeUrlToWslRemotes &&
-          projectPath.match(WSL_DEFAULT_REGEX)
-        ) {
-          projectPath = `vscode-remote://wsl+${projectPath.replace(
-            WSL_DEFAULT_REGEX,
-            ""
-          )}`;
+        if (prependVscodeUrlToWslRemotes && projectPath.match(WSL_DEFAULT_REGEX)) {
+          projectPath = `vscode-remote://wsl+${projectPath.replace(WSL_DEFAULT_REGEX, '')}`;
         }
 
         uri = vscode.Uri.parse(projectPath);
 
-        await vscode.commands.executeCommand(
-          "vscode.openFolder",
-          uri,
-          openInNewWindow
-        );
+        await vscode.commands.executeCommand('vscode.openFolder', uri, openInNewWindow);
         break;
     }
   }
 
-  async function addToWorkspace(
-    project: Project,
-    uri: vscode.Uri
-  ): Promise<void> {
+  async function addToWorkspace(project: Project, uri: vscode.Uri): Promise<void> {
     let wsToAdd: { uri: vscode.Uri; name?: string }[];
     let projectPathType = await fileService.getProjectPathType(uri.fsPath);
 
@@ -569,29 +503,21 @@ export function activate(context: vscode.ExtensionContext) {
         break;
       case ProjectPathType.WorkspaceFile:
         try {
-          let folderPaths = await fileService.getFoldersFromWorkspaceFile(
-            uri.fsPath
-          );
+          let folderPaths = await fileService.getFoldersFromWorkspaceFile(uri.fsPath);
           wsToAdd = folderPaths.map((f) => ({ uri: vscode.Uri.file(f) }));
         } catch (e) {
           console.error(e);
-          vscode.window.showErrorMessage(
-            "Could not read the project's workspace file."
-          );
+          vscode.window.showErrorMessage("Could not read the project's workspace file.");
           return;
         }
         break;
       default:
-        vscode.window.showInformationMessage(
-          "A file project cannot be added to the workspace."
-        );
+        vscode.window.showInformationMessage('A file project cannot be added to the workspace.');
         return;
     }
 
     let workspaceFolders = new Set(
-      (vscode.workspace.workspaceFolders || []).map((w) =>
-        path.normalize(w.uri.fsPath)
-      )
+      (vscode.workspace.workspaceFolders || []).map((w) => path.normalize(w.uri.fsPath)),
     );
     wsToAdd = wsToAdd.filter((ws) => {
       return !workspaceFolders.has(path.normalize(ws.uri.fsPath));
@@ -605,16 +531,13 @@ export function activate(context: vscode.ExtensionContext) {
     let couldOpen = vscode.workspace.updateWorkspaceFolders(
       workspaceFolders.size,
       null,
-      ...wsToAdd
+      ...wsToAdd,
     );
 
     if (!couldOpen) {
-      vscode.window.showErrorMessage("Could not add project to workspace.");
+      vscode.window.showErrorMessage('Could not add project to workspace.');
     } else if (isNewWorkSpace) {
-      context.globalState.update(
-        REOPEN_KEY,
-        ReopenDashboardReason.EditorReopenedAsWorkspace
-      );
+      context.globalState.update(REOPEN_KEY, ReopenDashboardReason.EditorReopenedAsWorkspace);
       instance.dispose();
     }
   }
@@ -630,9 +553,7 @@ export function activate(context: vscode.ExtensionContext) {
       await projectService.addProject(project, selectedGroupId);
     } catch (error) {
       if (error.message !== USER_CANCELED) {
-        vscode.window.showErrorMessage(
-          `An error occured while adding the project.`
-        );
+        vscode.window.showErrorMessage(`An error occured while adding the project.`);
         throw error; // Rethrow error to make vscode log it
       }
 
@@ -650,17 +571,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     var editedProject: Project, selectedGroupId: string;
     try {
-      [editedProject, selectedGroupId] = await queryProjectFields(
-        group.id,
-        true,
-        project
-      );
+      [editedProject, selectedGroupId] = await queryProjectFields(group.id, true, project);
       await projectService.updateProject(projectId, editedProject);
     } catch (error) {
       if (error.message !== USER_CANCELED) {
-        vscode.window.showErrorMessage(
-          `An error occured while updating project ${project.name}.`
-        );
+        vscode.window.showErrorMessage(`An error occured while updating project ${project.name}.`);
         throw error;
       }
 
@@ -681,9 +596,7 @@ export function activate(context: vscode.ExtensionContext) {
       await projectService.updateProject(projectId, project);
     } catch (error) {
       if (error.message !== USER_CANCELED) {
-        vscode.window.showErrorMessage(
-          `An error occured while updating project ${project.name}.`
-        );
+        vscode.window.showErrorMessage(`An error occured while updating project ${project.name}.`);
         throw error;
       }
 
@@ -696,12 +609,10 @@ export function activate(context: vscode.ExtensionContext) {
   async function queryProjectFields(
     groupId: string = null,
     isEditing: boolean,
-    projectTemplate: { name?: string; path?: string; color?: string } = null
+    projectTemplate: { name?: string; path?: string; color?: string } = null,
   ): Promise<[Project, string]> {
     // For editing a project: Ignore Group selection and take it from template
-    var selectedGroupId: string,
-      projectPath: string,
-      defaultProjectName: string;
+    var selectedGroupId: string, projectPath: string, defaultProjectName: string;
     var groupWasNewlyCreated = false;
 
     try {
@@ -715,28 +626,21 @@ export function activate(context: vscode.ExtensionContext) {
       if (!isEditing) {
         // New
         if (selectedGroupId == null) {
-          [selectedGroupId, groupWasNewlyCreated] = await queryGroup(
-            groupId,
-            true
-          );
+          [selectedGroupId, groupWasNewlyCreated] = await queryGroup(groupId, true);
         }
         projectPath = await queryProjectPath(projectPath);
       }
 
       defaultProjectName =
-        defaultProjectName ||
-        getLastPartOfPath(projectPath).replace(/\.code-workspace$/g, "");
+        defaultProjectName || getLastPartOfPath(projectPath).replace(/\.code-workspace$/g, '');
 
       // Name
       var projectName = await vscode.window.showInputBox({
         value: defaultProjectName || undefined,
-        valueSelection: defaultProjectName
-          ? [0, defaultProjectName.length]
-          : undefined,
-        placeHolder: "Project Name",
+        valueSelection: defaultProjectName ? [0, defaultProjectName.length] : undefined,
+        placeHolder: 'Project Name',
         ignoreFocusOut: true,
-        validateInput: (val: string) =>
-          val ? "" : "A Project Name must be provided.",
+        validateInput: (val: string) => (val ? '' : 'A Project Name must be provided.'),
       });
 
       if (!projectName) {
@@ -751,15 +655,15 @@ export function activate(context: vscode.ExtensionContext) {
         let updatePathPicks = [
           {
             id: false,
-            label: "Keep Path",
+            label: 'Keep Path',
           },
           {
             id: true,
-            label: "Edit Path",
+            label: 'Edit Path',
           },
         ];
         let updatePath = await vscode.window.showQuickPick(updatePathPicks, {
-          placeHolder: "Edit Path?",
+          placeHolder: 'Edit Path?',
         });
 
         if (updatePath == null) {
@@ -797,12 +701,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   async function queryGroup(
     groupId: string = null,
-    optionForAdding: boolean = false
+    optionForAdding: boolean = false,
   ): Promise<[string, boolean]> {
     var groups = projectService.getGroups();
 
     if (optionForAdding && !groups.length) {
-      groupId = "Add";
+      groupId = 'Add';
     } else {
       // Reorder array to set given group to front (to quickly select it).
       let orderedGroups = groups;
@@ -819,7 +723,7 @@ export function activate(context: vscode.ExtensionContext) {
       let groupPicks = orderedGroups.map((group) => {
         let label = group.groupName;
         if (!label) {
-          label = defaultGroupSet ? "Unnamed Group" : "Default Group";
+          label = defaultGroupSet ? 'Unnamed Group' : 'Default Group';
           defaultGroupSet = true;
         }
 
@@ -831,13 +735,13 @@ export function activate(context: vscode.ExtensionContext) {
 
       if (optionForAdding) {
         groupPicks.push({
-          id: "Add",
-          label: "Add new Group",
+          id: 'Add',
+          label: 'Add new Group',
         });
       }
 
       let selectedGroupPick = await vscode.window.showQuickPick(groupPicks, {
-        placeHolder: "Group",
+        placeHolder: 'Group',
       });
 
       if (selectedGroupPick == null) {
@@ -848,12 +752,11 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     var newlyCreated = false;
-    if (groupId === "Add") {
+    if (groupId === 'Add') {
       let newGroupName = await vscode.window.showInputBox({
-        placeHolder: "New Group Name",
+        placeHolder: 'New Group Name',
         ignoreFocusOut: true,
-        validateInput: (val: string) =>
-          val ? "" : "A Group Name must be provided.",
+        validateInput: (val: string) => (val ? '' : 'A Group Name must be provided.'),
       });
 
       if (newGroupName == null) {
@@ -869,42 +772,39 @@ export function activate(context: vscode.ExtensionContext) {
 
   async function queryProjectPath(defaultPath: string = null): Promise<string> {
     let projectTypePicks = [
-      { id: "dir", label: "Folder Project" },
-      { id: "file", label: "Workspace or File Project" },
-      { id: "manual", label: `Enter manually` },
+      { id: 'dir', label: 'Folder Project' },
+      { id: 'file', label: 'Workspace or File Project' },
+      { id: 'manual', label: `Enter manually` },
       {
-        id: "ssh",
+        id: 'ssh',
         label: `SSH Target ${
           !dashboardInfos.relevantExtensionsInstalls.remoteSSH
-            ? "(Remote Development extension is not installed)"
-            : ""
+            ? '(Remote Development extension is not installed)'
+            : ''
         }`,
       },
     ];
 
-    let selectedProjectTypePick = await vscode.window.showQuickPick(
-      projectTypePicks,
-      {
-        placeHolder: "Project Type",
-      }
-    );
+    let selectedProjectTypePick = await vscode.window.showQuickPick(projectTypePicks, {
+      placeHolder: 'Project Type',
+    });
 
     if (selectedProjectTypePick == null) {
       throw new Error(USER_CANCELED);
     }
 
     if (defaultPath != null) {
-      defaultPath = defaultPath.replace(REMOTE_REGEX, ""); // 'Trim vscode-remote://REMOTE_TYPE+'
+      defaultPath = defaultPath.replace(REMOTE_REGEX, ''); // 'Trim vscode-remote://REMOTE_TYPE+'
     }
 
     switch (selectedProjectTypePick.id) {
-      case "dir":
+      case 'dir':
         return await getPathFromPicker(true, defaultPath);
-      case "file":
+      case 'file':
         return await getPathFromPicker(false, defaultPath);
-      case "manual":
+      case 'manual':
         return await getManualPath(defaultPath);
-      case "ssh":
+      case 'ssh':
         return await getSSHPath(defaultPath);
       default:
         throw new Error(USER_CANCELED);
@@ -913,21 +813,19 @@ export function activate(context: vscode.ExtensionContext) {
 
   async function getPathFromPicker(
     folderProject: boolean,
-    defaultPath: string = null
+    defaultPath: string = null,
   ): Promise<string> {
     var defaultUri: vscode.Uri = undefined;
     if (defaultPath) {
       defaultPath =
-        folderProject && fileService.isFile(defaultPath)
-          ? path.dirname(defaultPath)
-          : defaultPath;
+        folderProject && fileService.isFile(defaultPath) ? path.dirname(defaultPath) : defaultPath;
       defaultUri = vscode.Uri.file(defaultPath);
     }
 
     // Path
     let selectedProjectUris = await vscode.window.showOpenDialog({
       defaultUri,
-      openLabel: `Select ${folderProject ? "Folder" : "File"} as Project`,
+      openLabel: `Select ${folderProject ? 'Folder' : 'File'} as Project`,
       canSelectFolders: folderProject,
       canSelectFiles: !folderProject,
       canSelectMany: false,
@@ -942,11 +840,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   async function getManualPath(defaultPath: string = null): Promise<string> {
     let manualPath = await vscode.window.showInputBox({
-      placeHolder: "./",
+      placeHolder: './',
       value: defaultPath || undefined,
       ignoreFocusOut: true,
       prompt:
-        "Enter absolute or relative path to the project.\nProjects with relative paths can only be opened if a workspace is already open.",
+        'Enter absolute or relative path to the project.\nProjects with relative paths can only be opened if a workspace is already open.',
     });
 
     if (!manualPath) {
@@ -958,12 +856,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   async function getSSHPath(defaultPath: string = null): Promise<string> {
     let remotePath = await vscode.window.showInputBox({
-      placeHolder: "user@target.xyz/home/optional-folder",
+      placeHolder: 'user@target.xyz/home/optional-folder',
       value: SSH_REGEX.test(defaultPath) ? defaultPath : undefined,
       ignoreFocusOut: true,
-      prompt: "SSH remote, target folder is optional",
+      prompt: 'SSH remote, target folder is optional',
       validateInput: (val: string) =>
-        SSH_REGEX.test(val) ? "" : "A valid SSH Target must be proviced",
+        SSH_REGEX.test(val) ? '' : 'A valid SSH Target must be proviced',
     });
 
     if (!remotePath) {
@@ -976,12 +874,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   function buildColorText(colorCode: string, colorName: string = null): string {
     if (colorCode == null) {
-      return "";
+      return '';
     }
 
     // If color is received from workspace:
-    if(colorCode = 'WORKSPACE') {
-        return 'Workspace color from .vscode/settings.json'
+    if ((colorCode = 'WORKSPACE')) {
+      return 'Workspace color from .vscode/settings.json';
     }
 
     // If color is predefined, use this label only.
@@ -999,7 +897,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   async function queryProjectColor(
     isEditing: boolean,
-    projectTemplate: { color?: string } = null
+    projectTemplate: { color?: string } = null,
   ): Promise<string> {
     isEditing = isEditing && projectTemplate != null;
 
@@ -1019,22 +917,22 @@ export function activate(context: vscode.ExtensionContext) {
       id: c.label,
       label: c.label,
     }));
-    colorPicks.unshift({ id: FixedColorOptions.random, label: "Random Color" });
+    colorPicks.unshift({ id: FixedColorOptions.random, label: 'Random Color' });
     colorPicks.unshift({
       id: FixedColorOptions.workspace,
-      label: "> Workspace Color",
+      label: '> Workspace Color',
     });
     colorPicks.unshift({
       id: FixedColorOptions.custom,
-      label: "> Custom Color",
+      label: '> Custom Color',
     });
     colorPicks.unshift({
       id: FixedColorOptions.recent,
-      label: "> Recent Colors",
+      label: '> Recent Colors',
     });
 
     if (!isEditing || projectTemplate.color) {
-      colorPicks.push({ id: FixedColorOptions.none, label: "None" });
+      colorPicks.push({ id: FixedColorOptions.none, label: 'None' });
     } else if (isEditing && !projectTemplate.color) {
       colorPicks.unshift({
         id: FixedColorOptions.none,
@@ -1044,12 +942,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (isEditing && projectTemplate.color) {
       // Get existing color name by value
-      let color = PREDEFINED_COLORS.find(
-        (c) => c.value === projectTemplate.color
-      );
-      let existingEntryIdx = !color
-        ? -1
-        : colorPicks.findIndex((p) => p.id === color.label);
+      let color = PREDEFINED_COLORS.find((c) => c.value === projectTemplate.color);
+      let existingEntryIdx = !color ? -1 : colorPicks.findIndex((p) => p.id === color.label);
 
       // If color is already in quicklist, remove it
       if (existingEntryIdx !== -1) {
@@ -1065,7 +959,7 @@ export function activate(context: vscode.ExtensionContext) {
     do {
       color = null;
       let selectedColorPick = await vscode.window.showQuickPick(colorPicks, {
-        placeHolder: "Project Color",
+        placeHolder: 'Project Color',
       });
 
       if (selectedColorPick == null) {
@@ -1076,12 +970,12 @@ export function activate(context: vscode.ExtensionContext) {
         case FixedColorOptions.custom:
           let customColor = await vscode.window.showInputBox({
             placeHolder:
-              "#cc3344   crimson   rgb(68, 145, 203)   linear-gradient(to right, gold, darkorange)",
+              '#cc3344   crimson   rgb(68, 145, 203)   linear-gradient(to right, gold, darkorange)',
             ignoreFocusOut: true,
-            prompt: "Any color name, value or gradient.",
+            prompt: 'Any color name, value or gradient.',
           });
 
-          color = (customColor || "").replace(/[;"]/g, "").trim();
+          color = (customColor || '').replace(/[;"]/g, '').trim();
           break;
         case FixedColorOptions.recent:
           let recentColors = colorService.getRecentColors();
@@ -1092,18 +986,15 @@ export function activate(context: vscode.ExtensionContext) {
 
           recentColorPicks.unshift({
             id: null,
-            label: "(Back)",
+            label: '(Back)',
           });
 
-          let selectedRecentColor = await vscode.window.showQuickPick(
-            recentColorPicks,
-            {
-              placeHolder: recentColorPicks.length
-                ? "Recent Color"
-                : "No colors have recently been used.",
-              ignoreFocusOut: true,
-            }
-          );
+          let selectedRecentColor = await vscode.window.showQuickPick(recentColorPicks, {
+            placeHolder: recentColorPicks.length
+              ? 'Recent Color'
+              : 'No colors have recently been used.',
+            ignoreFocusOut: true,
+          });
 
           // if (selectedRecentColor == null) {
           //     throw new Error(USER_CANCELED);
@@ -1113,7 +1004,7 @@ export function activate(context: vscode.ExtensionContext) {
           }
           break;
         case FixedColorOptions.workspace:
-          return "WORKSPACE";
+          return 'WORKSPACE';
         case FixedColorOptions.none:
           return null; // Only case to allow null color
         case FixedColorOptions.random:
@@ -1122,8 +1013,7 @@ export function activate(context: vscode.ExtensionContext) {
         default:
           // PredefinedColor
           let predefinedColor = PREDEFINED_COLORS.find(
-            (c) =>
-              c.label == selectedColorPick.id || c.value == selectedColorPick.id
+            (c) => c.label == selectedColorPick.id || c.value == selectedColorPick.id,
           );
           if (predefinedColor != null) {
             color = predefinedColor.value;
@@ -1152,118 +1042,101 @@ export function activate(context: vscode.ExtensionContext) {
     var projects = projectService.getGroups();
     const tempFilePath = getGroupsTempFilePath();
     try {
-      await fileService.writeTextFile(
-        tempFilePath,
-        JSON.stringify(projects, null, 4)
-      );
+      await fileService.writeTextFile(tempFilePath, JSON.stringify(projects, null, 4));
     } catch (e) {
-      vscode.window
-        .showErrorMessage(`Can not write temporary project file under ${tempFilePath}
-            ${e.message ? ": " + e.message : "."}`);
+      vscode.window.showErrorMessage(`Can not write temporary project file under ${tempFilePath}
+            ${e.message ? ': ' + e.message : '.'}`);
       return;
     }
 
     const tempFileUri = vscode.Uri.file(tempFilePath);
 
-    var editProjectsDocument = await vscode.workspace.openTextDocument(
-      tempFileUri
-    );
+    var editProjectsDocument = await vscode.workspace.openTextDocument(tempFileUri);
 
     await vscode.window.showTextDocument(editProjectsDocument);
 
     var subscriptions: vscode.Disposable[] = [];
-    var editSubscription = vscode.workspace.onWillSaveTextDocument(
-      async (e) => {
-        if (e.document == editProjectsDocument) {
-          let updatedGroups;
-          try {
-            var text = e.document.getText() || "[]";
-            updatedGroups = JSON.parse(text);
-          } catch (ex) {
-            vscode.window.showErrorMessage(
-              "Edited Projects File can not be parsed."
-            );
-            return;
-          }
+    var editSubscription = vscode.workspace.onWillSaveTextDocument(async (e) => {
+      if (e.document == editProjectsDocument) {
+        let updatedGroups;
+        try {
+          var text = e.document.getText() || '[]';
+          updatedGroups = JSON.parse(text);
+        } catch (ex) {
+          vscode.window.showErrorMessage('Edited Projects File can not be parsed.');
+          return;
+        }
 
-          // Validate and Cleanup
-          var jsonIsInvalid = false;
-          if (Array.isArray(updatedGroups)) {
-            for (let group of updatedGroups) {
-              if (group.name && !group.groupName) {
-                // One of the testers produced a group with any groupName
-                // We could not reproduce that, but this may be a result from updating legacy groups
-                // This should fix that issue
-                group.groupName = group.name;
-                delete group.name;
-              }
+        // Validate and Cleanup
+        var jsonIsInvalid = false;
+        if (Array.isArray(updatedGroups)) {
+          for (let group of updatedGroups) {
+            if (group.name && !group.groupName) {
+              // One of the testers produced a group with any groupName
+              // We could not reproduce that, but this may be a result from updating legacy groups
+              // This should fix that issue
+              group.groupName = group.name;
+              delete group.name;
+            }
 
-              if (
-                group &&
-                group.groupName == null &&
-                (group.projects == null || !group.projects.length)
-              ) {
-                // Remove empty, unnamed group
-                group._delete = true;
-              } else if (
-                !group ||
-                !group.id ||
-                group.groupName == undefined ||
-                !group.projects ||
-                !Array.isArray(group.projects)
-              ) {
-                jsonIsInvalid = true;
-                break;
-              } else {
-                for (let project of group.projects) {
-                  if (
-                    !project ||
-                    !project.id ||
-                    !project.name ||
-                    !project.path
-                  ) {
-                    jsonIsInvalid = true;
-                    break;
-                  }
-
-                  // Remove obsolete properties
-                  delete project.imageFileName;
+            if (
+              group &&
+              group.groupName == null &&
+              (group.projects == null || !group.projects.length)
+            ) {
+              // Remove empty, unnamed group
+              group._delete = true;
+            } else if (
+              !group ||
+              !group.id ||
+              group.groupName == undefined ||
+              !group.projects ||
+              !Array.isArray(group.projects)
+            ) {
+              jsonIsInvalid = true;
+              break;
+            } else {
+              for (let project of group.projects) {
+                if (!project || !project.id || !project.name || !project.path) {
+                  jsonIsInvalid = true;
+                  break;
                 }
+
+                // Remove obsolete properties
+                delete project.imageFileName;
               }
             }
-          } else {
-            jsonIsInvalid = true;
           }
-
-          if (jsonIsInvalid) {
-            vscode.window.showErrorMessage(
-              "Edited Projects File does not meet the Schema expected by Dashboard."
-            );
-            return;
-          }
-
-          updatedGroups = updatedGroups.filter((g) => !g._delete);
-
-          await projectService.saveGroups(updatedGroups);
-
-          subscriptions.forEach((s) => s.dispose());
-
-          // Select and close our document editor
-          try {
-            await vscode.window.showTextDocument(e.document);
-            await vscode.commands.executeCommand(
-              "workbench.action.closeActiveEditor"
-            );
-          } catch (e) {
-            vscode.window.showErrorMessage(
-              "Could not close the edited Projects File. Please close manually."
-            );
-          }
-
-          showDashboard();
+        } else {
+          jsonIsInvalid = true;
         }
+
+        if (jsonIsInvalid) {
+          vscode.window.showErrorMessage(
+            'Edited Projects File does not meet the Schema expected by Dashboard.',
+          );
+          return;
+        }
+
+        updatedGroups = updatedGroups.filter((g) => !g._delete);
+
+        await projectService.saveGroups(updatedGroups);
+
+        subscriptions.forEach((s) => s.dispose());
+
+        // Select and close our document editor
+        try {
+          await vscode.window.showTextDocument(e.document);
+          await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+        } catch (e) {
+          vscode.window.showErrorMessage(
+            'Could not close the edited Projects File. Please close manually.',
+          );
+        }
+
+        showDashboard();
       }
-    );
+    });
     subscriptions.push(editSubscription);
   }
 
@@ -1276,7 +1149,7 @@ export function activate(context: vscode.ExtensionContext) {
     let accepted = await vscode.window.showWarningMessage(
       `Remove ${project.name}?`,
       { modal: true },
-      "Remove"
+      'Remove',
     );
     if (!accepted) {
       return;
@@ -1290,9 +1163,7 @@ export function activate(context: vscode.ExtensionContext) {
     var groups = projectService.getGroups();
 
     if (groupOrders == null) {
-      vscode.window.showInformationMessage(
-        "Invalid Argument passed to Reordering Projects."
-      );
+      vscode.window.showInformationMessage('Invalid Argument passed to Reordering Projects.');
       return;
     }
 
@@ -1313,12 +1184,10 @@ export function activate(context: vscode.ExtensionContext) {
     for (let { groupId, projectIds } of groupOrders) {
       let group = groups.find((g) => g.id === groupId);
       if (group == null) {
-        group = new Group("Group #" + (reorderedGroups.length + 1));
+        group = new Group('Group #' + (reorderedGroups.length + 1));
       }
 
-      group.projects = projectIds
-        .map((pid) => projectMap.get(pid))
-        .filter((p) => p != null);
+      group.projects = projectIds.map((pid) => projectMap.get(pid)).filter((p) => p != null);
       reorderedGroups.push(group);
     }
 
@@ -1329,10 +1198,9 @@ export function activate(context: vscode.ExtensionContext) {
   function isFolderGitRepo(fPath: string) {
     try {
       fPath = lstatSync(fPath).isDirectory() ? fPath : path.dirname(fPath);
-      var test = execSync(
-        `cd ${fPath} && git rev-parse --is-inside-work-tree`,
-        { encoding: "utf8" }
-      );
+      var test = execSync(`cd ${fPath} && git rev-parse --is-inside-work-tree`, {
+        encoding: 'utf8',
+      });
       return !!test;
     } catch (e) {
       return false;
@@ -1346,32 +1214,27 @@ export function activate(context: vscode.ExtensionContext) {
 
   function getLastPartOfPath(path: string): string {
     if (!path) {
-      return "";
+      return '';
     }
     // get last folder of filename of path/remote
-    path = path.replace(REMOTE_REGEX, ""); // Remove remote prefix
-    path = path.replace(/^\w+\@/, ""); // Remove Username
-    let lastPart = path
-      .replace(/^[\\\/]|[\\\/]$/g, "")
-      .replace(/^.*[\\\/]/, "");
+    path = path.replace(REMOTE_REGEX, ''); // Remove remote prefix
+    path = path.replace(/^\w+\@/, ''); // Remove Username
+    let lastPart = path.replace(/^[\\\/]|[\\\/]$/g, '').replace(/^.*[\\\/]/, '');
 
     return lastPart;
   }
 
   function getWorkspacePath(): string {
     let workspaceUri = vscode.workspace.workspaceFile;
-    if (workspaceUri == null || workspaceUri.scheme === "untitled") {
+    if (workspaceUri == null || workspaceUri.scheme === 'untitled') {
       workspaceUri =
-        vscode.workspace.workspaceFolders &&
-        vscode.workspace.workspaceFolders.length
+        vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length
           ? vscode.workspace.workspaceFolders[0].uri
           : null;
     }
 
     if (workspaceUri != null) {
-      return workspaceUri.scheme === "file"
-        ? workspaceUri.fsPath
-        : workspaceUri.path;
+      return workspaceUri.scheme === 'file' ? workspaceUri.fsPath : workspaceUri.path;
     } else {
       return null;
     }
