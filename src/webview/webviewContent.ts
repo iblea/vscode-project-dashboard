@@ -202,7 +202,6 @@ function getTempGroupSection(totalGroupCount: number) {
 }
 
 function getProjectDiv(project: Project, infos: DashboardInfos) {
-  console.log(project);
   var borderStyle = `background: ${
     project.color === "WORKSPACE"
       ? Project.getWorkspaceColor(project)

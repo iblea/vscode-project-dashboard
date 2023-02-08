@@ -1,9 +1,9 @@
 {
   "name": "vscode-dashboard-window-colors",
-  "displayName": "Project Dashboard",
+  "displayName": "Projects Dashboard",
   "description": "Organize your workspaces in a speed-dial manner.",
   "version": "2.7.0",
-  "publisher": "Daniel Varentsoff",
+  "publisher": "DanielVarentsoff",
   "icon": "media/extension_icon.png",
   "engines": {
     "vscode": "^1.51.0"
@@ -172,6 +172,8 @@
   },
   "scripts": {
     "vscode:prepublish": "webpack --mode production && npx gulp --production",
+    "vscode:package": "vsce package",
+    "vscode:publish": "vsce publish",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch",
     "test-compile": "tsc -p ./",
