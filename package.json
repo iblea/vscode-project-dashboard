@@ -2,7 +2,7 @@
   "name": "vscode-dashboard-window-colors",
   "displayName": "Projects Dashboard",
   "description": "Organize your workspaces in a speed-dial manner.",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "publisher": "DanielVarentsoff",
   "icon": "media/extension_icon.png",
   "engines": {
