@@ -1,9 +1,9 @@
-"use strict";
-import * as vscode from "vscode";
-import * as ntc from "./ntc";
+'use strict';
+import * as vscode from 'vscode';
+import * as ntc from './ntc';
 
-import { RECENT_COLORS_KEY, PREDEFINED_COLORS } from "../constants";
-import BaseService from "./baseService";
+import { RECENT_COLORS_KEY, PREDEFINED_COLORS } from '../constants';
+import BaseService from './baseService';
 
 // WARNING: This is not a drop in replacement solution and
 // it might not work for some edge cases. Test your code!
@@ -11,14 +11,12 @@ import BaseService from "./baseService";
 // of https://youmightnotneed.com/lodash#unionBy
 // which would work with only one array
 const uniqBy = (arr, iteratee) => {
-  if (typeof iteratee === "string") {
+  if (typeof iteratee === 'string') {
     const prop = iteratee;
     iteratee = (item) => item[prop];
   }
 
-  return arr.filter(
-    (x, i, self) => i === self.findIndex((y) => iteratee(x) === iteratee(y))
-  );
+  return arr.filter((x, i, self) => i === self.findIndex((y) => iteratee(x) === iteratee(y)));
 };
 
 export default class ColorService extends BaseService {
@@ -35,7 +33,7 @@ export default class ColorService extends BaseService {
   }
 
   async addRecentColor(colorCode: string) {
-    if (!colorCode) {
+    if (!colorCode || colorCode === 'WORKSPACE') {
       return;
     }
 
@@ -49,9 +47,7 @@ export default class ColorService extends BaseService {
     // Remove duplicate names (except empty entries)
     colors = uniqBy(colors, (d) => d[1] || Math.random());
 
-    var maxColorCount = this.configurationSection.get(
-      "recentColorsToRemember"
-    ) as number;
+    var maxColorCount = this.configurationSection.get('recentColorsToRemember') as number;
     colors = colors.slice(0, maxColorCount);
 
     await this.saveColors(colors);
@@ -71,8 +67,7 @@ export default class ColorService extends BaseService {
 
       if (colorHex) {
         var colorMatch = ntc.default.name(colorCode);
-        colorName =
-          colorMatch[1] && !colorMatch[1].includes(":") ? colorMatch[1] : null;
+        colorName = colorMatch[1] && !colorMatch[1].includes(':') ? colorMatch[1] : null;
       }
 
       return colorName;
@@ -83,25 +78,20 @@ export default class ColorService extends BaseService {
 
   getRandomColor(predefinedOnly: false = false) {
     if (predefinedOnly) {
-      let predefColor =
-        PREDEFINED_COLORS[Math.floor(Math.random() * PREDEFINED_COLORS.length)];
+      let predefColor = PREDEFINED_COLORS[Math.floor(Math.random() * PREDEFINED_COLORS.length)];
       return predefColor.value;
     }
 
     var randomColorEntry = ntc.default.random();
-    return "#" + randomColorEntry[0];
+    return '#' + randomColorEntry[0];
   }
 
   private getColorsFromGlobalState(): string[][] {
-    return (
-      (this.context.globalState.get(RECENT_COLORS_KEY) as string[][]) || []
-    );
+    return (this.context.globalState.get(RECENT_COLORS_KEY) as string[][]) || [];
   }
 
   private getColorsFromSettings(): string[][] {
-    return (
-      (this.configurationSection.get(RECENT_COLORS_KEY) as string[][]) || []
-    );
+    return (this.configurationSection.get(RECENT_COLORS_KEY) as string[][]) || [];
   }
 
   private saveColorsInGlobalState(colors: string[][]): Thenable<void> {
@@ -112,7 +102,7 @@ export default class ColorService extends BaseService {
     return this.configurationSection.update(
       RECENT_COLORS_KEY,
       colors,
-      vscode.ConfigurationTarget.Global
+      vscode.ConfigurationTarget.Global,
     );
   }
 
@@ -123,7 +113,7 @@ export default class ColorService extends BaseService {
 
     colorString = colorString.trim();
 
-    if (colorString[0] === "#") {
+    if (colorString[0] === '#') {
       return colorString.substr(0, 7);
     }
 
@@ -142,22 +132,22 @@ export default class ColorService extends BaseService {
     // Credits to https://css-tricks.com/converting-color-spaces-in-javascript/
 
     // Choose correct separator
-    let sep = rgb.indexOf(",") > -1 ? "," : " ";
-    let leftParenthesis = rgb.indexOf("(");
+    let sep = rgb.indexOf(',') > -1 ? ',' : ' ';
+    let leftParenthesis = rgb.indexOf('(');
     // Turn "rgb(r,g,b)" into [r,g,b]
     var split = rgb
       .substr(leftParenthesis + 1)
-      .split(")")[0]
+      .split(')')[0]
       .split(sep);
 
     let r = (+split[0]).toString(16),
       g = (+split[1]).toString(16),
       b = (+split[2]).toString(16);
 
-    if (r.length == 1) r = "0" + r;
-    if (g.length == 1) g = "0" + g;
-    if (b.length == 1) b = "0" + b;
+    if (r.length == 1) r = '0' + r;
+    if (g.length == 1) g = '0' + g;
+    if (b.length == 1) b = '0' + b;
 
-    return "#" + r + g + b;
+    return '#' + r + g + b;
   }
 }

@@ -2,7 +2,17 @@
 
 All notable changes to the "Project Dashboard" extension will be documented in this file. It follows the [Keep a Changelog](http://keepachangelog.com/) recommendations.
 
-## [2.7.2] 2022-11-22
+## [2.7.3] 2022-09-22
+
+### Added
+
+- Now last workspace color is saved (helpful if vscode settings is removed)
+
+### Fixed
+
+- Recent color is not saved if it is workspace one
+
+## [2.7.2] 2023-09-22
 
 ### Added
 
