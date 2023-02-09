@@ -1,15 +1,11 @@
-"use strict";
+'use strict';
 
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 
-import { Project, Group } from "../models";
-import {
-  ADD_NEW_PROJECT_TO_FRONT,
-  PROJECTS_KEY,
-  StorageOption,
-} from "../constants";
-import BaseService from "./baseService";
-import ColorService from "./colorService";
+import { Project, Group } from '../models';
+import { ADD_NEW_PROJECT_TO_FRONT, PROJECTS_KEY, StorageOption } from '../constants';
+import BaseService from './baseService';
+import ColorService from './colorService';
 
 export default class ProjectService extends BaseService {
   colorService: ColorService;
@@ -66,10 +62,7 @@ export default class ProjectService extends BaseService {
   }
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~ ADD ~~~~~~~~~~~~~~~~~~~~~~~~~
-  async addGroup(
-    groupName: string,
-    projects: Project[] = null
-  ): Promise<Group> {
+  async addGroup(groupName: string, projects: Project[] = null): Promise<Group> {
     var groups = this.getGroups();
     if (groups == null) {
       groups = [];
@@ -173,15 +166,10 @@ export default class ProjectService extends BaseService {
     return groups;
   }
 
-  async removeGroup(
-    groupId: string,
-    testIfEmpty: boolean = false
-  ): Promise<Group[]> {
+  async removeGroup(groupId: string, testIfEmpty: boolean = false): Promise<Group[]> {
     let groups = this.getGroups();
 
-    groups = groups.filter(
-      (g) => g.id !== groupId || (testIfEmpty && g.projects.length)
-    );
+    groups = groups.filter((g) => g.id !== groupId || (testIfEmpty && g.projects.length));
     await this.saveGroups(groups);
 
     return groups;
@@ -196,15 +184,10 @@ export default class ProjectService extends BaseService {
 
   // ~~~~~~~~~~~~~~~~~~~~~~~~~ STORAGE ~~~~~~~~~~~~~~~~~~~~~~~~~
   private getCurrentStorageOption(): StorageOption {
-    return this.useSettingsStorage()
-      ? StorageOption.Settings
-      : StorageOption.GlobalState;
+    return this.useSettingsStorage() ? StorageOption.Settings : StorageOption.GlobalState;
   }
 
-  private getProjectsFromStorage(
-    storage: StorageOption = null,
-    unsafe: boolean = false
-  ): Group[] {
+  private getProjectsFromStorage(storage: StorageOption = null, unsafe: boolean = false): Group[] {
     storage = storage || this.getCurrentStorageOption();
 
     switch (storage) {
@@ -228,7 +211,7 @@ export default class ProjectService extends BaseService {
   }
 
   private getProjectsFromSettings(unsafe: boolean = false): Group[] {
-    var groups = this.configurationSection.get("projectData") as Group[];
+    var groups = this.configurationSection.get('projectData') as Group[];
 
     if (groups == null && !unsafe) {
       groups = [];
@@ -237,10 +220,7 @@ export default class ProjectService extends BaseService {
     return groups;
   }
 
-  private saveGroupsInStorage(
-    groups: Group[],
-    storage: StorageOption = null
-  ): Thenable<void> {
+  private saveGroupsInStorage(groups: Group[], storage: StorageOption = null): Thenable<void> {
     storage = storage || this.getCurrentStorageOption();
 
     switch (storage) {
@@ -259,9 +239,9 @@ export default class ProjectService extends BaseService {
 
   private saveGroupsInSettings(groups: Group[]): Thenable<void> {
     return this.configurationSection.update(
-      "projectData",
+      'projectData',
       groups,
-      vscode.ConfigurationTarget.Global
+      vscode.ConfigurationTarget.Global,
     );
   }
 
@@ -291,7 +271,7 @@ export default class ProjectService extends BaseService {
     }
 
     var storageOptionToCopyFrom = this.getStorageOptionsWithData().find(
-      (s) => s !== this.getCurrentStorageOption()
+      (s) => s !== this.getCurrentStorageOption(),
     );
 
     var projects = this.getProjectsFromStorage(storageOptionToCopyFrom, true);
@@ -335,16 +315,17 @@ export default class ProjectService extends BaseService {
     for (let g of groups) {
       if (!g.id) {
         g.id = Group.getRandomId();
-        // FIXME: Investigate why instantiated but getters are N/A
-        // g.projects = g.projects.map((project) => {
-        //   const { id, name, color, path, isGitRepo } = project;
-        //   const projectEntity = new Project(name, path);
-        //   projectEntity.id = id;
-        //   projectEntity.color = color;
-        //   projectEntity.isGitRepo = isGitRepo;
-        //   return projectEntity;
-        // });
       }
+      g.projects = g.projects.map((project) => {
+        // TODO: Save projects
+        if (project.color === 'WORKSPACE') {
+          const customColor = Project.getWorkspaceColor(project);
+          const lastColor = project.lastWorkspaceColor;
+          if (customColor) project.lastWorkspaceColor = customColor;
+          if (customColor && lastColor !== customColor) this.updateProject(project.id, project);
+        }
+        return project;
+      });
     }
 
     return groups;

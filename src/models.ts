@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'fs';
 import * as vscode from 'vscode';
-import { SSH_REMOTE_PREFIX, StorageOption, WSL_DEFAULT_REGEX } from './constants';
+import { SSH_REMOTE_PREFIX, WSL_DEFAULT_REGEX } from './constants';
 
 export class Group {
   id: string;
@@ -26,6 +26,7 @@ export class Project {
   name: string;
   path: string;
   color: string;
+  lastWorkspaceColor: string;
   isGitRepo = false;
 
   constructor(name: string, path: string) {
@@ -41,10 +42,10 @@ export class Project {
         .trim();
       const settings = JSON.parse(fileContent);
       const colorCustomizations = settings['workbench.colorCustomizations'];
-      return (
+      const color =
         colorCustomizations['titleBar.activeBackground'] ||
-        colorCustomizations['activityBar.background']
-      );
+        colorCustomizations['activityBar.background'];
+      return color;
     } catch (ex) {
       console.error(`Unable to load workspace color: ${ex.name}`);
       return null;
