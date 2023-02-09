@@ -2,6 +2,16 @@
 
 All notable changes to the "Project Dashboard" extension will be documented in this file. It follows the [Keep a Changelog](http://keepachangelog.com/) recommendations.
 
+## [2.7.2] 2022-11-22
+
+### Added
+
+- Complete functionality of window colors library
+
+### Improvements
+
+- Better UI and cards design
+
 ## [2.7.0] 2023-08-02
 
 ### Added
