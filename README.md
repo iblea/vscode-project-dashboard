@@ -55,3 +55,10 @@ By default, the dashboard uses only colors defined by the theme, which was teste
 
 - Special thanks to [Font Awesome](http://fontawesome.io) [(License)](https://fontawesome.com/license) for the icons used in the dashboard.
 - The color names are generated using the [Name that Color](http://chir.ag/projects/name-that-color/#6195ED) library.
+
+## Legal notice
+This extension uses some code of following repositories only for educational purposes:
+
+> https://github.com/stuartcrobinson/unique-window-colors (NO LICENSE)
+
+> https://github.com/Kruemelkatze/vscode-dashboard (MIT)
