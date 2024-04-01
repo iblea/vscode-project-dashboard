@@ -13,13 +13,13 @@ export function getSidebarContent() {
         <meta charset="UTF-8">
     </head>
     <body>
-        <p>If you are reading this, you have placed the Project Dashboard sidebar view into another sidebar container. 
+        <p>If you are reading this, you have placed the Project Dashboard sidebar view into another sidebar container.
         This view is not intended to be visible. Instead, it is simply a shortcut for opening the main Project Dashboard.</p>
 
-        <p>If you moved the sidebar view unintentionally and want to restore the original (intended) state, 
+        <p>If you moved the sidebar view unintentionally and want to restore the original (intended) state,
         please drag and drop this panel onto the sidebar.</p>
 
-        <p>If you encounter any problems or think this behaviour is misleading, 
+        <p>If you encounter any problems or think this behaviour is misleading,
         <a href="https://github.com/Kruemelkatze/vscode-dashboard/issues">please let me know.</a></p>
 
     </body>
@@ -84,7 +84,7 @@ export function getDashboardContent(
             ? getImportDiv()
             : getNoProjectsDiv()
         }
-        
+
             </div>
 
             ${infos.config.showAddGroupButtonTile ? getTempGroupSection(groups.length) : ''}
@@ -105,8 +105,8 @@ export function getDashboardContent(
         (function() {
             fitty('.project-header', ${JSON.stringify(FITTY_OPTIONS)});
 
-            window.vscode = acquireVsCodeApi();      
-            
+            window.vscode = acquireVsCodeApi();
+
             window.onload = () => {
                 initProjects();
                 initDnD();
@@ -143,7 +143,7 @@ function getGroupSection(group: Group, totalGroupCount: number, infos: Dashboard
         <div class="drop-signal"></div>
         ${group.projects.map((p) => getProjectDiv(p, infos)).join('\n')}
         ${showAddProjectButton ? getAddProjectDiv(group.id) : ''}
-    </div>       
+    </div>
 </div>`;
 }
 
@@ -155,9 +155,9 @@ function getTempGroupSection(totalGroupCount: number) {
     </div>
     <div class="group-list">
         <div class="drop-signal"></div>
-    </div>       
-</div>     
-    </div>       
+    </div>
+</div>
+    </div>
 </div>`;
 }
 
@@ -171,7 +171,7 @@ function getProjectDiv(project: Project, infos: DashboardInfos) {
   var lowerName = (project.name || '').toLowerCase();
 
   var isRemote = remoteType !== ProjectRemoteType.None;
-  var remoteExError = isRemote && !infos.relevantExtensionsInstalls.remoteSSH;
+  var remoteExError = isRemote && !infos.relevantExtensionsInstalls.remoteSSH && !infos.relevantExtensionsInstalls.remoteCONTAINER;
 
   return `
 <div class="project-container">
@@ -231,7 +231,7 @@ function getImportDiv() {
   return `
 <div class="project-container">
     <div class="project no-projects import-data" data-action="import-from-other-storage" data-nodrag>
-        Your dashboard is empty, but there are projects in your other storage. 
+        Your dashboard is empty, but there are projects in your other storage.
         <br/>
         This can happen if the storage option has been changed on a different device that is synced via Settings Sync.
         <p>Click here to import.</p>
@@ -264,7 +264,7 @@ function getProjectContextMenu() {
     </div>
 
     <div class="custom-context-menu-separator"></div>
-    
+
     <div class="custom-context-menu-item" data-action="color">
         Edit Color
     </div>
@@ -280,7 +280,7 @@ function getProjectContextMenu() {
 
 function getGroupContextMenu() {
   return `
-<div id="groupContextMenu" class="custom-context-menu">   
+<div id="groupContextMenu" class="custom-context-menu">
     <div class="custom-context-menu-item" data-action="add">
         Add Project
     </div>

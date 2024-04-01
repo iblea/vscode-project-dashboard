@@ -84,6 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
   const dashboardInfos: DashboardInfos = {
     relevantExtensionsInstalls: {
       remoteSSH: false,
+      remoteCONTAINER: false
     },
     get config() {
       return vscode.workspace.getConfiguration('dashboard');
@@ -807,10 +808,19 @@ export function activate(context: vscode.ExtensionContext) {
         id: 'ssh',
         label: `SSH Target ${
           !dashboardInfos.relevantExtensionsInstalls.remoteSSH
-            ? '(Remote Development extension is not installed)'
+            ? '(Remote Development (Remote SSH) extension is not installed)'
             : ''
         }`,
       },
+      {
+        id: 'container',
+        label: `Container Target ${
+          !dashboardInfos.relevantExtensionsInstalls.remoteCONTAINER
+            ? '(Remote Development (Dev Container) extension is not installed)'
+            : ''
+        }`,
+      },
+
     ];
 
     let selectedProjectTypePick = await vscode.window.showQuickPick(projectTypePicks, {
@@ -833,7 +843,9 @@ export function activate(context: vscode.ExtensionContext) {
       case 'manual':
         return await getManualPath(defaultPath);
       case 'ssh':
-        return await getSSHPath(defaultPath);
+        return await getRemotePath(defaultPath, "SSH");
+      case 'container':
+        return await getRemotePath(defaultPath, "DEV CONTAINER");
       default:
         throw new Error(USER_CANCELED);
     }
@@ -882,21 +894,44 @@ export function activate(context: vscode.ExtensionContext) {
     return manualPath.trim();
   }
 
-  async function getSSHPath(defaultPath: string = null): Promise<string> {
+  async function getRemotePath(
+    defaultPath: string = null,
+    remoteType: string = "SSH"    // "SSH" or "DEV CONTAINER"
+  ): Promise<string> {
+
+    let remoteRegex : RegExp = undefined;
+    let remotePrefix: string = undefined;
+    let remotePlaceHolder: string = undefined;
+
+    switch (remoteType) {
+      case 'SSH':
+        remoteRegex = SSH_REGEX;
+        remotePrefix = SSH_REMOTE_PREFIX;
+        remotePlaceHolder = 'user@target.xyz/home/optional-folder or workspace';
+        break;
+      case 'DEV CONTAINER':
+        remoteRegex = CONTAINER_REGEX;
+        remotePrefix = DEV_CONTAINER_PREFIX;
+        remotePlaceHolder = 'container/home/optional-folder or workspace';
+        break;
+      default:
+        throw new Error("Argument Error");
+    }
+
     let remotePath = await vscode.window.showInputBox({
-      placeHolder: 'user@target.xyz/home/optional-folder',
-      value: SSH_REGEX.test(defaultPath) ? defaultPath : undefined,
+      placeHolder: remotePlaceHolder,
+      value: remoteRegex.test(defaultPath) ? defaultPath : undefined,
       ignoreFocusOut: true,
-      prompt: 'SSH remote, target folder is optional',
+      prompt: `${remoteType} remote, target folder is optional`,
       validateInput: (val: string) =>
-        SSH_REGEX.test(val) ? '' : 'A valid SSH Target must be proviced',
+        remoteRegex.test(val) ? '' : `A valid ${remoteType} Target must be proviced`,
     });
 
     if (!remotePath) {
       throw new Error(USER_CANCELED);
     }
 
-    remotePath = `${SSH_REMOTE_PREFIX}${remotePath}`;
+    remotePath = `${remotePrefix}${remotePath}`;
     return remotePath.trim();
   }
 

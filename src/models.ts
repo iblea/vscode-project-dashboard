@@ -2,7 +2,7 @@
 
 import { readFileSync } from 'fs';
 import * as vscode from 'vscode';
-import { SSH_REMOTE_PREFIX, WSL_DEFAULT_REGEX } from './constants';
+import { SSH_REMOTE_PREFIX, WSL_DEFAULT_REGEX, DEV_CONTAINER_PREFIX } from './constants';
 
 export class Group {
   id: string;
@@ -120,7 +120,7 @@ export interface GroupOrder {
 }
 
 export interface DashboardInfos {
-  relevantExtensionsInstalls: { remoteSSH };
+  relevantExtensionsInstalls: { remoteSSH, remoteCONTAINER };
   config: vscode.WorkspaceConfiguration;
   otherStorageHasData: boolean;
 }

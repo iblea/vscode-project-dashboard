@@ -90,4 +90,5 @@ export const FixedColorOptions = Object.freeze({
 
 export const RelevantExtensions = Object.freeze({
   remoteSSH: 'ms-vscode-remote.remote-ssh',
+  remoteCONTAINER: 'ms-vscode-remote.remote-containers',
 });
