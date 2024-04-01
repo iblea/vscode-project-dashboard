@@ -60,6 +60,8 @@ export class Project {
       (this.path.match(WSL_DEFAULT_REGEX) || this.path.startsWith('vscode-remote://wsl+'))
     ) {
       return ProjectRemoteType.WSL;
+    } else if (this.path && this.path.startsWith(DEV_CONTAINER_PREFIX)) {
+      return ProjectRemoteType.CONTAINER;
     }
 
     return ProjectRemoteType.None;
@@ -80,6 +82,26 @@ export function sanitizeProjectName(name: string) {
 
 export function getRemoteType(project: Project): ProjectRemoteType {
   return Project.prototype.getRemoteType.call(project);
+}
+
+export function getContainerHex(containerName: string | null, contextName="desktop-linux"): string | null {
+  if (containerName === null) {
+    return null;
+  }
+
+  let containerObject = {
+    containerName: "/" + containerName,
+    settings: {
+        context: contextName
+    }
+  };
+
+  let objString = JSON.stringify(containerObject);
+  let objectHex = "";
+  for (let i = 0; i < objString.length; i++) {
+      objectHex += objString.charCodeAt(i).toString(16);
+  }
+  return objectHex;
 }
 
 function generateRandomId(prepend: string = null) {
@@ -119,6 +141,7 @@ export enum ProjectRemoteType {
   None,
   SSH,
   WSL,
+  CONTAINER
 }
 
 export enum ReopenDashboardReason {

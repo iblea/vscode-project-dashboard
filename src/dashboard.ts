@@ -7,6 +7,7 @@ import {
   Group,
   ProjectRemoteType,
   getRemoteType,
+  getContainerHex,
   DashboardInfos,
   ProjectOpenType,
   ReopenDashboardReason,
@@ -26,6 +27,8 @@ import {
   SSH_REMOTE_PREFIX,
   REOPEN_KEY,
   WSL_DEFAULT_REGEX,
+  CONTAINER_REGEX,
+  DEV_CONTAINER_PREFIX,
 } from './constants';
 import { execSync } from 'child_process';
 import { lstatSync } from 'fs';
@@ -488,6 +491,31 @@ export function activate(context: vscode.ExtensionContext) {
         uri = vscode.Uri.parse(projectPath);
 
         await vscode.commands.executeCommand('vscode.openFolder', uri, openInNewWindow);
+        break;
+      case ProjectRemoteType.CONTAINER:
+        let containerPathMatch = projectPath.replace(DEV_CONTAINER_PREFIX, '').match(CONTAINER_REGEX);
+        let containerName = containerPathMatch.groups.containername;
+        let containerHex = getContainerHex(containerName);
+        let hasContainerFolder = containerPathMatch && containerPathMatch.groups.folder != null;
+
+        // abnormal container
+        if (containerHex === null) {
+          break;
+        }
+
+        // change container name to hex
+        projectPath = projectPath.replace(DEV_CONTAINER_PREFIX + containerName,
+          DEV_CONTAINER_PREFIX + containerHex);
+
+        if (hasContainerFolder) {
+          uri = vscode.Uri.parse(projectPath);
+          vscode.commands.executeCommand('vscode.openFolder', uri, openInNewWindow);
+        } else {
+          vscode.commands.executeCommand('vscode.newWindow', {
+            remoteAuthority: projectPath.replace('vscode-remote://', ''),
+            reuseWindow: !openInNewWindow,
+          });
+        }
         break;
     }
   }
