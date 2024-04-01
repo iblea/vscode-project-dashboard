@@ -68,9 +68,11 @@ export const USER_CANCELED = 'CanceledByUser'; // A symbol would be nice, but th
 export const ADD_NEW_PROJECT_TO_FRONT = false;
 
 export const SSH_REMOTE_PREFIX = 'vscode-remote://ssh-remote+';
+export const DEV_CONTAINER_PREFIX = 'vscode-remote://attached-container+';
 export const REMOTE_REGEX = /^vscode-remote:\/\/[^\+]+\+/;
 export const SSH_REGEX = /^((?<user>[^@\/]+)(\@))?(?<hostname>[^@\/\. ]+[^@\/ ]*)(?<folder>\/.*)*$/;
 export const WSL_DEFAULT_REGEX = /\\+wsl\$\\/i;
+export const CONTAINER_REGEX = /^(?<containername>[^@\/\. ]+[^@\/ ]*)(?<folder>\/.*)*$/;
 
 export const StartupOptions = Object.freeze({
   always: 'always',
