@@ -57,6 +57,10 @@
       {
         "command": "dashboard.addProjectsFromFolder",
         "title": "Project Dashboard: Add Projects from Folder"
+      },
+      {
+        "command": "dashboard.openProjectWindow",
+        "title": "Project Dashboard: Open Project in New Window"
       }
     ],
     "keybindings": [
@@ -207,7 +211,7 @@
     "@types/mocha": "^8.0.4",
     "@types/node": "^14.14.8",
     "@types/vscode": "^1.51.0",
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.0",
     "gulp-clean-css": "^4.3.0",
     "gulp-mode": "^1.1.0",
     "gulp-sass": "^5.0.0",

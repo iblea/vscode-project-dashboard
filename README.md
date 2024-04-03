@@ -61,4 +61,6 @@ This extension uses some code of following repositories only for educational pur
 
 > https://github.com/stuartcrobinson/unique-window-colors (NO LICENSE)
 
-> https://github.com/Kruemelkatze/vscode-dashboard (MIT)
+> origin repo : https://github.com/Kruemelkatze/vscode-dashboard (MIT)
+
+> forked repo : https://github.com/DanielNoveo/vscode-dashboard (MIT)
