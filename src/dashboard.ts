@@ -125,8 +125,16 @@ export function activate(context: vscode.ExtensionContext) {
       await addProjectsFromFolder();
     },
   );
+  const openProjectWindowCommand = vscode.commands.registerCommand(
+    'dashboard.openProjectWindow',
+    async () => {
+      await openProjectInNewWindow();
+    },
+  );
+
 
   context.subscriptions.push(openCommand);
+  context.subscriptions.push(openProjectWindowCommand);
   context.subscriptions.push(addProjectCommand);
   context.subscriptions.push(removeProjectCommand);
   context.subscriptions.push(editProjectsManuallyCommand);
@@ -400,6 +408,25 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     showDashboard();
+  }
+
+  async function openProjectInNewWindow() {
+    try {
+      let projects = projectService.getProjectsFlat();
+      let projectPicks = projects.map((p) => ({ id: p.id, label: p.name }));
+
+      let selectedProjectPick = await vscode.window.showQuickPick(projectPicks);
+      if (selectedProjectPick == null) return;
+
+      let project =projectService.getProject(selectedProjectPick.id);
+      await openProject(project, ProjectOpenType.NewWindow);
+    } catch (error) {
+      if (error.message !== USER_CANCELED) {
+        vscode.window.showErrorMessage(`An error occured while open the project in new window.`);
+        throw error; // Rethrow error to make vscode log it
+      }
+      return;
+    }
   }
 
   async function removeGroup(groupId: string) {
