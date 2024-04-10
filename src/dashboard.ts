@@ -129,15 +129,24 @@ export function activate(context: vscode.ExtensionContext) {
       await addProjectsFromFolder();
     },
   );
-  const openProjectWindowCommand = vscode.commands.registerCommand(
-    'dashboard.openProjectWindow',
+  const openProjectNewWindowCommand = vscode.commands.registerCommand(
+    'dashboard.openProjectNewWindow',
     async () => {
-      await openProjectInNewWindow();
+      await openProjectInWindow(ProjectOpenType.NewWindow);
+    },
+  );
+  const openProjectWindowCommand = vscode.commands.registerCommand(
+    'dashboard.openProjectCurrentWindow',
+    async () => {
+      await openProjectInWindow(ProjectOpenType.Default);
     },
   );
 
 
+
+
   context.subscriptions.push(openCommand);
+  context.subscriptions.push(openProjectNewWindowCommand);
   context.subscriptions.push(openProjectWindowCommand);
   context.subscriptions.push(addProjectCommand);
   context.subscriptions.push(removeProjectCommand);
@@ -414,7 +423,7 @@ export function activate(context: vscode.ExtensionContext) {
     showDashboard();
   }
 
-  async function openProjectInNewWindow() {
+  async function openProjectInWindow(type) {
     try {
       let projects = projectService.getProjectsFlat();
       let projectPicks = projects.map((p) => ({ id: p.id, label: p.name }));
@@ -423,7 +432,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (selectedProjectPick == null) return;
 
       let project =projectService.getProject(selectedProjectPick.id);
-      await openProject(project, ProjectOpenType.NewWindow);
+      await openProject(project, type);
     } catch (error) {
       if (error.message !== USER_CANCELED) {
         vscode.window.showErrorMessage(`An error occured while open the project in new window.`);

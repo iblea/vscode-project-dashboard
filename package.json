@@ -59,8 +59,12 @@
         "title": "Project Dashboard: Add Projects from Folder"
       },
       {
-        "command": "dashboard.openProjectWindow",
+        "command": "dashboard.openProjectNewWindow",
         "title": "Project Dashboard: Open Project in New Window"
+      },
+      {
+        "command": "dashboard.openProjectCurrentWindow",
+        "title": "Project Dashboard: Open Project in Current Window"
       }
     ],
     "keybindings": [
