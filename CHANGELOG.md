@@ -2,6 +2,13 @@
 
 All notable changes to the "Project Dashboard" extension will be documented in this file. It follows the [Keep a Changelog](http://keepachangelog.com/) recommendations.
 
+## [2.8.0] 2024-06-08
+
+### Added
+
+- Dev Container (Remote - Containers) support
+- Add Command "Open Project in New Window"
+
 ## [2.7.3] 2022-09-22
 
 ### Added
