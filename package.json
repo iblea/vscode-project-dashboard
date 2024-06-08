@@ -1,9 +1,9 @@
 {
-  "name": "vscode-dashboard-window-colors",
-  "displayName": "Projects Dashboard",
+  "name": "vsc-project-dashboard-window-fork",
+  "displayName": "Projects Dashboard (Fork)",
   "description": "Organize your workspaces in a speed-dial manner.",
-  "version": "2.7.3",
-  "publisher": "DanielVarentsoff",
+  "version": "2.8.0",
+  "publisher": "iblea",
   "icon": "media/extension_icon.png",
   "engines": {
     "vscode": "^1.51.0"
