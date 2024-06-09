@@ -2,6 +2,12 @@
 
 All notable changes to the "Project Dashboard" extension will be documented in this file. It follows the [Keep a Changelog](http://keepachangelog.com/) recommendations.
 
+## [2.8.1] 2024-06-08
+
+### Fixed
+
+- Change Repository URL
+
 ## [2.8.0] 2024-06-08
 
 ### Added
