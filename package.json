@@ -21,7 +21,7 @@
   "main": "./dist/dashboard",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DanielNoveo/vscode-dashboard"
+    "url": "https://github.com/jfhib/vscode-dashboard"
   },
   "capabilities": {
     "untrustedWorkspaces": {
