@@ -2,7 +2,7 @@
   "name": "vsc-project-dashboard-window-fork",
   "displayName": "Projects Dashboard (Fork)",
   "description": "Organize your workspaces in a speed-dial manner.",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "publisher": "iblea",
   "icon": "media/extension_icon.png",
   "engines": {
