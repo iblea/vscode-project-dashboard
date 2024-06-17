@@ -2,6 +2,12 @@
 
 All notable changes to the "Project Dashboard" extension will be documented in this file. It follows the [Keep a Changelog](http://keepachangelog.com/) recommendations.
 
+## [2.8.3] 2024-06-17
+
+### Fixed
+
+- Change Repository URL (<https://github.com/iblea/vscode-project-dashboard>)
+
 ## [2.8.2] 2024-06-17
 
 ### Fixed
